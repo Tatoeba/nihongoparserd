@@ -5,6 +5,8 @@
 #include "Furigana.h"
 #include "Utf8.h"
 
+#define WARIFURI_SEPARATOR '.'
+
 std::unordered_map<uint32_t, uint32_t> Furigana::KataToHiraTable;
 
 const char Furigana::katakanas[][4] = {
@@ -104,59 +106,52 @@ static size_t find_initial_equal_chars(char *kanjis_start, char *reading_start)
 }
 
 /**
- * Find how much we should trim the given reading and kanji strings.
- * Returns the length of head and tail to trim.
- */
-static void find_trim_boundaries(
-    std::string kanjis_std,
-    std::string reading_std,
-    size_t *start_len,
-    size_t *end_len
-) {
-    char *kanjis  = strdup(kanjis_std.c_str());
-    char *reading = strdup(reading_std.c_str());
-
-    *start_len = find_initial_equal_chars(kanjis, reading);
-    utf8_strrev(kanjis);
-    utf8_strrev(reading);
-    *end_len = find_initial_equal_chars(kanjis, reading);
-    free(kanjis);
-    free(reading);
-}
-
-/**
- * Split the given strings into one, two, or three parts, giving the
- * provided head and tail length.
+ * Split the given string into one or more parts,
+ * giving the provided separator character.
+ * Each token in readingString matches one char of kanjisString.
+ * Several consecutive separator characters means the token
+ * spans on multiple chars of kanjisString.
  */
 static std::vector<std::pair<std::string, std::string> > split_furigana(
     std::string kanjisString,
     std::string readingString,
-    int start_len,
-    int end_len
+    const char separator
 ) {
     std::vector<std::pair<std::string, std::string> > tokens;
-    tokens.push_back(std::pair<std::string, std::string>(
-        kanjisString.substr(
-            start_len, kanjisString.length() - end_len - start_len
-        ),
-        readingString.substr(
-            start_len, readingString.length() - end_len - start_len
-        )
-    ));
-    if (start_len > 0) {
-        tokens.insert(
-            tokens.begin(),
-            std::pair<std::string, std::string>(
-                kanjisString.substr(0, start_len),
-                readingString.substr(0, start_len)
-            )
-        );
-    }
-    if (end_len > 0) {
+    const char *kanjis = kanjisString.c_str();
+    std::size_t reading_start = 0, reading_end = 0;
+    char kanji_char[5] = { '\0' }; /* 4 UTF-8 bytes + '\0' = 5 */
+
+    while (true) {
+        int more_kanjis = utf8_getc(&kanjis, kanji_char, sizeof(kanji_char)-1);
+        std::string kanji_chars(kanji_char);
+        reading_end = readingString.find(separator, reading_start);
+        std::string reading_chars
+            = readingString.substr(reading_start, reading_end - reading_start);
+
+        /* Consecutive separators: the reading spans on the previous kanji */
+        if (reading_start == reading_end) {
+            kanji_chars = tokens.back().first + kanji_chars;
+            reading_chars = tokens.back().second;
+            tokens.pop_back();
+        }
+
+        /* Stuff the remaining kanjis if we reached the end of the readings */
+        if (reading_end == std::string::npos && more_kanjis) {
+            while (more_kanjis = utf8_getc(&kanjis, kanji_char,
+                                           sizeof(kanji_char)-1)) {
+                kanji_chars += kanji_char;
+            }
+        }
+
         tokens.push_back(std::pair<std::string, std::string>(
-            kanjisString.substr(kanjisString.length() - end_len),
-            readingString.substr(readingString.length() - end_len)
+            kanji_chars,
+            reading_chars
         ));
+        if (!more_kanjis || reading_end == std::string::npos) {
+            break;
+        }
+        reading_start = reading_end + 1;
     }
     return tokens;
 }
@@ -172,18 +167,11 @@ std::vector<std::pair<std::string, std::string> > Furigana::tokenize(
 
     remove_spaces(readingString);
     readingString = this->katakana_to_hiragana(readingString);
-    find_trim_boundaries(
-        this->katakana_to_hiragana(kanjisString),
-        readingString,
-        &start_len,
-        &end_len
-    );
 
     auto tokens = split_furigana(
         kanjisString,
         readingString,
-        start_len,
-        end_len
+        WARIFURI_SEPARATOR
     );
 
     for (auto& text : tokens) {

@@ -4,6 +4,7 @@
 #include <mecab.h>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "Furigana.h"
 
@@ -17,6 +18,7 @@ class Parser {
     private:
         MeCab::Tagger* wakatiTagger;
         MeCab::Tagger* tagger;
+        std::unordered_set<std::string> ignoredReadings;
 
     public:
         Furigana furigana;

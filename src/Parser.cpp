@@ -72,6 +72,10 @@ std::vector<std::pair<std::string, std::string> > Parser::tokenize(
             std::string token = std::string(node->surface, node->length);
             std::string reading = std::string(mecab_node_get_reading(node));
 
+            if (Parser::ignoredReadings.count(token)) {
+                reading = token;
+            }
+
             tokens.push_back(std::pair<std::string, std::string>(
                 token,
                 reading
@@ -82,6 +86,11 @@ std::vector<std::pair<std::string, std::string> > Parser::tokenize(
 }
 
 Parser::Parser() {
+    Parser::ignoredReadings = {
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+        "\uff10", "\uff11", "\uff12", "\uff13", "\uff14",
+        "\uff15", "\uff16", "\uff17", "\uff18", "\uff19"
+    };
     wakatiTagger = MeCab::createTagger("-Owakati");
     yomiTagger = MeCab::createTagger("-Oyomi");
     tagger = MeCab::createTagger("");

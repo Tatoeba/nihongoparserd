@@ -7,9 +7,7 @@
 
 #define WARIFURI_SEPARATOR '.'
 
-std::unordered_map<uint32_t, uint32_t> Furigana::KataToHiraTable;
-
-const char Furigana::katakanas[][4] = {
+static const char katakanas[][4] = {
     "ァ","ア","ィ","イ","ゥ","ウ","ェ","エ","ォ","オ",
     "カ","ガ","キ","ギ","ク","グ","ケ","ゲ","コ","ゴ",
     "サ","ザ","シ","ジ","ス","ズ","セ","ゼ","ソ","ゾ",
@@ -21,7 +19,7 @@ const char Furigana::katakanas[][4] = {
     "ン","ヴ","ヵ","ヶ"
 };
 
-const char Furigana::hiraganas[][4] = {
+static const char hiraganas[][4] = {
     "ぁ","あ","ぃ","い","ぅ","う","ぇ","え","ぉ","お",
     "か","が","き","ぎ","く","ぐ","け","げ","こ","ご",
     "さ","ざ","し","じ","す","ず","せ","ぜ","そ","ぞ",
@@ -35,10 +33,10 @@ const char Furigana::hiraganas[][4] = {
 
 Furigana::Furigana() {
     /* Initialize the katakana to hiragana hash table. */
-    static size_t numKanas = sizeof(Furigana::katakanas)/sizeof(Furigana::katakanas[0]);
+    static size_t numKanas = sizeof(katakanas)/sizeof(katakanas[0]);
     for (int i = 0; i < numKanas; i++) {
-        uint32_t katakana = *(uint32_t*)Furigana::katakanas[i];
-        uint32_t hiragana = *(uint32_t*)Furigana::hiraganas[i];
+        uint32_t katakana = *(uint32_t*)katakanas[i];
+        uint32_t hiragana = *(uint32_t*)hiraganas[i];
         Furigana::KataToHiraTable.insert(std::make_pair(katakana, hiragana));
     }
 }

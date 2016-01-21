@@ -8,9 +8,7 @@
 
 class Furigana {
   private:
-    static std::unordered_map<uint32_t, uint32_t> KataToHiraTable;
-    static const char katakanas[][4];
-    static const char hiraganas[][4];
+    std::unordered_map<uint32_t, uint32_t> KataToHiraTable;
 
   public:
     Furigana();

@@ -172,11 +172,5 @@ std::vector<std::pair<std::string, std::string> > Furigana::tokenize(
         WARIFURI_SEPARATOR
     );
 
-    for (auto& text : tokens) {
-        if (this->katakana_to_hiragana(text.first) == text.second) {
-            text.second = "";
-        }
-    }
-
     return tokens;
 }

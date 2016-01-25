@@ -235,7 +235,10 @@ static void http_furigana_callback(struct evhttp_request *request, void *data) {
     for (auto& readings : tokens) {
         token_output_xml_header(buffer);
         for (auto& text : readings) {
-            if (text.second.empty()) {
+            /* "\"" can't have a reading in Mecab because of its CSV parsing
+               algorithm, while we want it to have the reading "\"" so that
+               it doesn't get an empty reading here */
+            if (text.first == text.second || text.first == "\"") {
                 cdata_output_xml(text.first.c_str(), buffer);
             } else {
                 reading_output_xml(text, buffer);

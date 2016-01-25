@@ -73,7 +73,7 @@ std::vector<std::pair<std::string, std::string> > Parser::tokenize(
             std::string reading = std::string(mecab_node_get_reading(node));
 
             if (Parser::ignoredReadings.count(token)) {
-                reading = token;
+                reading = "";
             }
 
             tokens.push_back(std::pair<std::string, std::string>(

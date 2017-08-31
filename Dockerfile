@@ -10,6 +10,7 @@ RUN apt-get update && \
     libevent-dev \
     libmecab-dev \
     mecab \
+    mecab-ipadic-utf8 \
     cmake
 
 # Build

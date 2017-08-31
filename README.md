@@ -5,24 +5,64 @@ A service to convert japanese languages into romaji, kana etc.
 
 for the moment it's based on libmecab but it may be replaced by homebrew parser in the future
 
-### Requirement ###
+## Building and running
+
+### With Docker
+
+Since getting this code to compile under macOS (the use of `strdupa` from the
+GNU C++ extensions may be hard or impossible under clang++), this repo contains
+a Dockerfile:
+
+```
+$ docker build -t nihongoparserd .
+$ docker run -t -i -p 8842:8842 nihongoparserd
+```
+
+You can then hit the service at localhost:8842
+[like so](http://localhost:8842/furigana?str=学校は家から遠いの?).
+
+To kill the service, you can:
+
+```
+$ docker ps #<-- to find the container ID
+$ docker kill <that_container_id>
+```
+
+### Building manually (without Docker)
+
+#### Requirements
 
   * libexpat
   * libevent
   * libmecab2
   * cmake
+  * a C++11 compatible compiler with GNU's stdlib
+  * a dictionary (e.g. `mecab-ipadic-utf8`)
 
-a C++11 compatible compiler
+#### Building
 
-### Usage ###
+To build the project:
 
+```
+$ cmake .
+$ make
+```
+
+To run the server:
+
+```
     ./nihonggoparserd -p PORT [-h HOSTNAME]
+```
 
-That will launch an HTTP server listening on port PORT, eventually HOSTNAME.
+That will launch an HTTP server listening on port PORT, bound to HOSTNAME.
+
+### Usage
+
 It provides the following API calls, that will return an XML answer.
-Note that contents are wrapped into `<![CDATA[...]]>`, which is removed from the following examples for readability.
+Note that contents are wrapped into `<![CDATA[...]]>`, which is removed from the
+following examples for readability.
 
-#### Parse ####
+#### Parse
 
 URL: `/parse?str=*`
 
@@ -45,7 +85,7 @@ Example of response for `/parse?str=学校は家から遠いの？`
 
 ```
 
-#### Furigana ####
+#### Furigana
 
 URL: `/furigana?str=*`
 
@@ -74,7 +114,7 @@ Example of response for `/furigana?str=学校は家から遠いの？`
 </root>
 ```
 
-#### Kana ####
+#### Kana
 
 URL: `/kana?str=*`
 
@@ -86,7 +126,3 @@ Example of rensponse for `/kana?str=学校は家から遠いの？`
     <kana>がっこうはいえからとおいの？</kana>
 </root>
 ```
-
-### Compile it
-
-    cmake . && make

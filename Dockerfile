@@ -9,6 +9,7 @@ RUN apt-get update && \
     libexpat1-dev \
     libevent-dev \
     libmecab-dev \
+    mecab \
     cmake
 
 # Build

@@ -5,6 +5,22 @@ A service to convert japanese languages into romaji, kana etc.
 
 for the moment it's based on libmecab but it may be replaced by homebrew parser in the future
 
+### Running under Docker
+
+Since getting this code to compile under macOS (the use of `strdupa` from the
+GNU C++ extensions may be hard or impossible under clang++), this repo contains
+a Dockerfile:
+
+```
+$ docker build -t nihongoparserd .
+$ docker run -p 8842:8842 nihongoparserd
+```
+
+You can then hit the service at
+[localhost:8842/parse](http://localhost:8842/parse). However, at the present
+time, it looks like adding the require `str` query param results in an immediate
+segfault.
+
 ### Requirement ###
 
   * libexpat

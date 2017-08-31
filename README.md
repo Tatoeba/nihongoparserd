@@ -13,7 +13,7 @@ a Dockerfile:
 
 ```
 $ docker build -t nihongoparserd .
-$ docker run -p 8842:8842 nihongoparserd
+$ docker run -t -i -p 8842:8842 nihongoparserd
 ```
 
 You can then hit the service at
